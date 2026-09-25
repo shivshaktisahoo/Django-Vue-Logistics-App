@@ -51,3 +51,179 @@ export interface Paginated<T> {
   previous: string | null
   results: T[]
 }
+
+// ---------------------------------------------------------------- master data
+
+export type Mode = 'air' | 'ocean' | 'road'
+
+export interface Party {
+  id: string
+  name: string
+  code: string
+  is_customer: boolean
+  is_shipper: boolean
+  is_consignee: boolean
+  owner: string | null
+  contact_name: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  country: string
+  tax_id: string
+  is_active: boolean
+  created_at: string
+}
+
+export interface Location {
+  id: string
+  code: string
+  name: string
+  kind: 'seaport' | 'airport' | 'inland' | 'warehouse' | 'city'
+  city: string
+  country: string
+  latitude: string
+  longitude: string
+  timezone: string
+  is_active: boolean
+}
+
+export interface Carrier {
+  id: string
+  name: string
+  code: string
+  mode: Mode
+  email: string
+  phone: string
+  country: string
+  is_active: boolean
+  vehicle_count: number
+  driver_count: number
+}
+
+export interface Vehicle {
+  id: string
+  carrier: string
+  carrier_name: string
+  plate_number: string
+  vehicle_type: string
+  capacity_kg: number
+  is_active: boolean
+}
+
+export interface Driver {
+  id: string
+  carrier: string
+  carrier_name: string
+  name: string
+  phone: string
+  license_number: string
+  is_active: boolean
+}
+
+// ---------------------------------------------------------------- shipments
+
+export type ShipmentStatus =
+  | 'draft'
+  | 'booked'
+  | 'picked_up'
+  | 'in_transit'
+  | 'at_customs'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'on_hold'
+  | 'cancelled'
+
+export type PartyRef = Pick<Party, 'id' | 'name' | 'code' | 'city' | 'country'>
+export type LocationRef = Pick<Location, 'id' | 'code' | 'name' | 'kind' | 'city' | 'country' | 'latitude' | 'longitude'>
+export type CarrierRef = Pick<Carrier, 'id' | 'name' | 'code' | 'mode'>
+
+export interface PackageLine {
+  id?: string
+  kind: 'container' | 'pallet' | 'carton' | 'crate' | 'drum' | 'piece'
+  container_type: string
+  container_number: string
+  seal_number: string
+  quantity: number
+  description: string
+  weight_kg: string
+  length_cm: string | null
+  width_cm: string | null
+  height_cm: string | null
+  volume_cbm?: string
+}
+
+export interface ShipmentListItem {
+  id: string
+  reference: string
+  tracking_number: string
+  status: ShipmentStatus
+  mode: Mode
+  service_type: string
+  incoterm: string
+  customer: PartyRef
+  origin: LocationRef
+  destination: LocationRef
+  carrier: CarrierRef | null
+  etd: string | null
+  eta: string | null
+  atd: string | null
+  ata: string | null
+  commodity: string
+  customer_reference: string
+  total_packages: number
+  gross_weight_kg: string
+  chargeable_weight_kg: string
+  is_hazardous: boolean
+  is_temperature_controlled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Shipment extends ShipmentListItem {
+  shipper: PartyRef
+  consignee: PartyRef
+  held_from_status: string
+  house_bill: string
+  master_bill: string
+  voyage_number: string
+  hs_code: string
+  declared_value: string | null
+  currency: string
+  special_instructions: string
+  volume_cbm: string
+  packages: PackageLine[]
+  allowed_transitions: (ShipmentStatus | 'resume')[]
+  can_edit: boolean
+}
+
+export interface TrackingEvent {
+  id: string
+  code: string
+  code_label: string
+  description: string
+  location: LocationRef | null
+  occurred_at: string
+  source: string
+  is_public: boolean
+  created_by_name: string
+  created_at: string
+}
+
+export interface AuditEntry {
+  id: string
+  action: string
+  entity_type: string
+  entity_id: string
+  entity_label: string
+  summary: string
+  changes: Record<string, [unknown, unknown]>
+  actor_name: string
+  created_at: string
+}
+
+export interface CursorPage<T> {
+  next: string | null
+  previous: string | null
+  results: T[]
+}

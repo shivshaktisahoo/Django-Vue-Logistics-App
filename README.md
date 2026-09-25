@@ -27,7 +27,7 @@ Visitors can create and edit freely. The demo workspace is rebuilt every night.
 | Phase | Scope | State |
 |---|---|---|
 | 1. Foundation | Multi-tenant orgs, 4-role RBAC, JWT with an httpOnly refresh cookie, one-click demo personas, CI, free-tier deploy pipeline | ✅ |
-| 2. Shipments core | Master data, shipment booking, packages/containers, status state machine, milestones, audit log | ⏳ |
+| 2. Shipments core | Master data (UN/LOCODE locations, carriers, fleet, customer address books), booking form with live chargeable weight, ISO 6346 container validation, status state machine, milestones, audit trail | ✅ |
 | 3. Tracking | Live map, computed vehicle positions, public tracking page, ETA/SLA exceptions | ⏳ |
 | 4. Carrier bidding & trips | Tenders, sealed bids, auto-close, award → trip, POD | ⏳ |
 | 5. Bulk ops & integration | CargoWise-style XML/CSV import with async progress, bulk updates, signed webhooks | ⏳ |

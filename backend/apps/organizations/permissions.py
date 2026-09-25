@@ -26,6 +26,7 @@ ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
             "members.view",
             "masterdata.view",
             "masterdata.manage",
+            "parties.create",
             "shipments.view",
             "shipments.manage",
             "shipments.book",
@@ -49,6 +50,7 @@ ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
         {
             "org.view",
             "masterdata.view",
+            "parties.create",
             "shipments.view",
             "shipments.book",
             "documents.view",

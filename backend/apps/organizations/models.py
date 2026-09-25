@@ -33,6 +33,14 @@ class Membership(UUIDModel, TimeStampedModel):
     )
     org = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="memberships")
     role = models.CharField(max_length=20, choices=Role.choices)
+    # Row-level scope for external users: a customer-portal user acts for one customer
+    # account, a carrier user for one carrier. Internal roles leave both empty.
+    party = models.ForeignKey(
+        "masterdata.Party", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    carrier = models.ForeignKey(
+        "masterdata.Carrier", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     is_active = models.BooleanField(default=True)
     invited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"

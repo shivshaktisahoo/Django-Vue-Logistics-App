@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.organizations",
+    "apps.audit",
+    "apps.masterdata",
+    "apps.shipments",
     "apps.demo",
 ]
 
@@ -177,6 +180,11 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
         "RoleEnum": "apps.organizations.permissions.Role",
+        "ShipmentStatusEnum": "apps.shipments.domain.ShipmentStatus",
+        "EventCodeEnum": "apps.shipments.domain.EventCode",
+        "ModeEnum": "apps.masterdata.models.Mode",
+        "LocationKindEnum": "apps.masterdata.models.Location.Kind",
+        "PackageKindEnum": "apps.shipments.models.Package.Kind",
     },
 }
 

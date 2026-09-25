@@ -44,6 +44,48 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Control tower' },
       },
       {
+        path: 'shipments',
+        name: 'shipments',
+        component: () => import('@/modules/shipments/pages/ShipmentsListPage.vue'),
+        meta: { permission: 'shipments.view', title: 'Shipments' },
+      },
+      {
+        path: 'shipments/new',
+        name: 'shipment-new',
+        component: () => import('@/modules/shipments/pages/ShipmentFormPage.vue'),
+        meta: { permission: 'shipments.book', title: 'New shipment' },
+      },
+      {
+        path: 'shipments/:id',
+        name: 'shipment-detail',
+        component: () => import('@/modules/shipments/pages/ShipmentDetailPage.vue'),
+        meta: { permission: 'shipments.view', title: 'Shipment' },
+      },
+      {
+        path: 'shipments/:id/edit',
+        name: 'shipment-edit',
+        component: () => import('@/modules/shipments/pages/ShipmentFormPage.vue'),
+        meta: { permission: 'shipments.book', title: 'Edit shipment' },
+      },
+      {
+        path: 'masterdata/parties',
+        name: 'parties',
+        component: () => import('@/modules/masterdata/pages/PartiesPage.vue'),
+        meta: { permission: 'masterdata.manage', title: 'Parties' },
+      },
+      {
+        path: 'masterdata/locations',
+        name: 'locations',
+        component: () => import('@/modules/masterdata/pages/LocationsPage.vue'),
+        meta: { permission: 'masterdata.manage', title: 'Locations' },
+      },
+      {
+        path: 'masterdata/carriers',
+        name: 'carriers',
+        component: () => import('@/modules/masterdata/pages/CarriersPage.vue'),
+        meta: { permission: 'masterdata.manage', title: 'Carriers & fleet' },
+      },
+      {
         path: 'settings/organization',
         name: 'org-settings',
         component: () => import('@/modules/settings/pages/OrgSettingsPage.vue'),

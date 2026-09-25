@@ -74,7 +74,7 @@ const groups: NavGroup[] = [
   {
     label: 'Operations',
     items: [
-      { title: 'Shipments', icon: mdiPackageVariantClosed, permission: 'shipments.view', soon: true },
+      { title: 'Shipments', icon: mdiPackageVariantClosed, to: '/shipments', permission: 'shipments.view' },
       { title: 'Live map', icon: mdiMapMarkerPath, permission: 'shipments.view', soon: true },
       { title: 'Exceptions', icon: mdiAlertOctagonOutline, permission: 'exceptions.view', soon: true },
       { title: 'Trips', icon: mdiTruckOutline, permission: 'trips.view', soon: true },
@@ -94,9 +94,9 @@ const groups: NavGroup[] = [
   {
     label: 'Master data',
     items: [
-      { title: 'Parties', icon: mdiAccountGroupOutline, permission: 'masterdata.manage', soon: true },
-      { title: 'Locations', icon: mdiMapMarkerRadiusOutline, permission: 'masterdata.manage', soon: true },
-      { title: 'Carriers & fleet', icon: mdiWarehouse, permission: 'masterdata.manage', soon: true },
+      { title: 'Parties', icon: mdiAccountGroupOutline, to: '/masterdata/parties', permission: 'masterdata.manage' },
+      { title: 'Locations', icon: mdiMapMarkerRadiusOutline, to: '/masterdata/locations', permission: 'masterdata.manage' },
+      { title: 'Carriers & fleet', icon: mdiWarehouse, to: '/masterdata/carriers', permission: 'masterdata.manage' },
     ],
   },
   {
