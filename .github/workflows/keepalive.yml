@@ -1,0 +1,22 @@
+name: Keep demo warm
+
+# Render's free web service sleeps after ~15 idle minutes, and waking it takes ~30 s.
+# Pinging the liveness endpoint (which deliberately does not touch the database) keeps
+# the API warm for visitors without keeping the serverless Postgres compute awake.
+#
+# Set the repository variable API_HEALTH_URL, e.g.
+#   https://cargopulse-api.onrender.com/api/v1/health/
+# Note: GitHub disables scheduled workflows after 60 days without repository activity.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    if: ${{ vars.API_HEALTH_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API
+        run: curl --fail --silent --show-error --max-time 90 --retry 2 "${{ vars.API_HEALTH_URL }}"

@@ -1,0 +1,30 @@
+# Render Blueprint: the API (plus an in-process Celery worker/beat) on the free plan.
+# Postgres (Neon) and Redis (Upstash) are external free-forever services; paste their
+# URLs when Render asks for the `sync: false` values. See docs/DEPLOY.md.
+services:
+  - type: web
+    name: cargopulse-api
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: bash bin/start-render.sh
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: localhost
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: DB_CONN_MAX_AGE
+        value: "0" # serverless Postgres: don't hold idle connections open
+      - key: WEB_CONCURRENCY
+        value: "2"

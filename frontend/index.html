@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0c1f3a" />
+    <meta name="description" content="%VITE_BRAND_NAME% — %VITE_BRAND_TAGLINE%." />
+    <title>%VITE_BRAND_NAME%</title>
+    <style>
+      /* Instant splash: painted before any JS loads, replaced when the app mounts. */
+      #cp-splash {
+        position: fixed; inset: 0; display: flex; flex-direction: column; gap: 20px;
+        align-items: center; justify-content: center; background: #f3f6fb;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #0c1f3a;
+      }
+      @media (prefers-color-scheme: dark) { #cp-splash { background: #070d18; color: #dbeafe; } }
+      #cp-splash .logo { width: 56px; height: 56px; animation: cp-pulse 1.2s ease-in-out infinite; }
+      #cp-splash .bar { width: 140px; height: 3px; border-radius: 3px; background: rgba(8,145,178,.15); overflow: hidden; }
+      #cp-splash .bar::after { content: ''; display: block; width: 40%; height: 100%; background: #0891b2;
+        border-radius: 3px; animation: cp-slide 1s ease-in-out infinite; }
+      @keyframes cp-pulse { 50% { transform: scale(.92); opacity: .8; } }
+      @keyframes cp-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="cp-splash">
+        <img class="logo" src="/favicon.svg" alt="" />
+        <div class="bar"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
