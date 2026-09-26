@@ -120,6 +120,9 @@ async function submit() {
     </v-form>
 
     <div class="text-body-2 text-center text-medium-emphasis mt-6">
+      Have a tracking number? <router-link :to="{ name: 'track' }" class="text-primary font-weight-bold">Track a shipment</router-link>
+    </div>
+    <div class="text-body-2 text-center text-medium-emphasis mt-2">
       New here? <router-link :to="{ name: 'register' }" class="text-primary font-weight-bold">Create an account</router-link>
     </div>
   </AuthShell>

@@ -6,6 +6,7 @@ import {
   mdiChevronDown,
   mdiClockAlertOutline,
   mdiContentCopy,
+  mdiShareVariantOutline,
   mdiFire,
   mdiPencilOutline,
   mdiSnowflake,
@@ -26,6 +27,9 @@ import AuditTrail from '../components/AuditTrail.vue'
 import EventTimeline from '../components/EventTimeline.vue'
 import JourneyBar from '../components/JourneyBar.vue'
 import StatusDialog from '../components/StatusDialog.vue'
+import RouteMap from '@/components/map/RouteMap.vue'
+import ExceptionCard from '@/modules/exceptions/components/ExceptionCard.vue'
+import type { LiveShipment, Paginated, ShipmentExceptionItem } from '@/api/types'
 
 const route = useRoute()
 const orgStore = useOrgStore()
@@ -40,6 +44,26 @@ const { data: s, isLoading, isError } = useQuery({
 })
 
 const tab = ref('overview')
+
+const hasRoute = computed(() => !!s.value && !['draft', 'cancelled'].includes(s.value.status))
+const { data: live } = useQuery({
+  queryKey: computed(() => [...key.value, 'live']),
+  queryFn: async () => (await http.get<LiveShipment>(`/tracking/shipments/${id.value}/`)).data,
+  enabled: hasRoute,
+})
+const { data: openExceptions } = useQuery({
+  queryKey: computed(() => ['exceptions', orgStore.currentId, 'shipment', id.value]),
+  queryFn: async () =>
+    (await http.get<Paginated<ShipmentExceptionItem>>('/exceptions/', { params: { shipment: id.value, status: 'open,acknowledged' } })).data
+      .results,
+  enabled: computed(() => orgStore.can('exceptions.view')),
+})
+function refreshExceptions() {
+  queryClient.invalidateQueries({ queryKey: ['exceptions', orgStore.currentId] })
+  queryClient.invalidateQueries({ queryKey: [...key.value, 'audit'] })
+  queryClient.invalidateQueries({ queryKey: [...key.value, 'live'] })
+  queryClient.invalidateQueries({ queryKey: ['exceptions', orgStore.currentId] })
+}
 const dialog = ref<{ open: boolean; target: ShipmentStatus | 'resume' | null }>({ open: false, target: null })
 const isInternal = computed(() => orgStore.role === 'admin' || orgStore.role === 'ops')
 
@@ -62,9 +86,13 @@ function onChanged(updated: Shipment) {
   notify.success(`${updated.reference} is now ${STATUS[updated.status].label.toLowerCase()}`)
 }
 
-async function copy(text: string) {
+function shareLink() {
+  if (s.value) copy(`${window.location.origin}/track/${s.value.tracking_number}`, 'Public tracking link copied')
+}
+
+async function copy(text: string, message = 'Copied') {
   await navigator.clipboard?.writeText(text)
-  notify.success('Copied')
+  notify.success(message)
 }
 
 const kindLabel = (k: string) => PACKAGE_KINDS.find((p) => p.value === k)?.title ?? k
@@ -103,6 +131,7 @@ const billLabels = computed(() =>
           </div>
         </div>
         <div class="d-flex flex-wrap ga-2">
+          <v-btn v-if="hasRoute" variant="text" :prepend-icon="mdiShareVariantOutline" @click="shareLink">Share tracking</v-btn>
           <v-btn v-if="s.can_edit" variant="tonal" :prepend-icon="mdiPencilOutline" :to="{ name: 'shipment-edit', params: { id: s.id } }">Edit</v-btn>
           <v-btn v-if="primary" :color="TRANSITION_ACTION[primary].color" :prepend-icon="TRANSITION_ACTION[primary].icon" @click="act(primary)">
             {{ TRANSITION_ACTION[primary].label }}
@@ -132,12 +161,24 @@ const billLabels = computed(() =>
       <v-alert v-else-if="s.status === 'draft' && isInternal" type="info" variant="tonal" class="mb-4" title="Awaiting confirmation">
         Check the details, assign a carrier and confirm the booking.
       </v-alert>
-      <v-alert v-else-if="health === 'late'" type="error" variant="tonal" class="mb-4" :icon="mdiClockAlertOutline" title="Past ETA">
+      <v-alert v-else-if="health === 'late' && !openExceptions?.length" type="error" variant="tonal" class="mb-4" :icon="mdiClockAlertOutline" title="Past ETA">
         The promised arrival was {{ formatDateTime(s.eta) }} and the shipment hasn't been delivered.
       </v-alert>
-      <v-alert v-else-if="health === 'risk'" type="warning" variant="tonal" class="mb-4" :icon="mdiAlertOutline" title="ETA at risk">
+      <v-alert v-else-if="health === 'risk' && !openExceptions?.length" type="warning" variant="tonal" class="mb-4" :icon="mdiAlertOutline" title="ETA at risk">
         Due within 24 hours but not yet at the destination.
       </v-alert>
+
+      <!-- Open exceptions -->
+      <div v-if="openExceptions?.length" class="d-flex flex-column ga-2 mb-4">
+        <ExceptionCard
+          v-for="e in openExceptions"
+          :key="e.id"
+          :exc="e"
+          :can-manage="orgStore.can('exceptions.manage')"
+          :show-shipment="false"
+          @changed="refreshExceptions"
+        />
+      </div>
 
       <!-- Journey -->
       <v-card class="cp-card pa-5 pa-md-6 mb-5">
@@ -156,6 +197,18 @@ const billLabels = computed(() =>
           </div>
         </div>
         <JourneyBar :shipment="s" />
+      </v-card>
+
+      <v-card v-if="live" class="cp-card overflow-hidden mb-5">
+        <RouteMap
+          :route="live.route"
+          :position="live.position"
+          :origin="live.origin"
+          :destination="live.destination"
+          :mode="live.mode"
+          :health="live.eta_health"
+          height="340px"
+        />
       </v-card>
 
       <v-row>

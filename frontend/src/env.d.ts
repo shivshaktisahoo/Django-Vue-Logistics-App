@@ -5,3 +5,9 @@ declare module '*.vue' {
   const component: DefineComponent<object, object, unknown>
   export default component
 }
+
+interface ImportMetaEnv {
+  readonly VITE_MAP_TILES_LIGHT?: string
+  readonly VITE_MAP_TILES_DARK?: string
+  readonly VITE_MAP_ATTRIBUTION?: string
+}

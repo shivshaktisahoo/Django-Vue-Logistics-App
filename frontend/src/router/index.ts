@@ -28,6 +28,12 @@ const routes: RouteRecordRaw[] = [
     meta: { guest: true, title: 'Create account' },
   },
   {
+    path: '/track/:number?',
+    name: 'track',
+    component: () => import('@/modules/tracking/pages/PublicTrackingPage.vue'),
+    meta: { public: true, title: 'Track a shipment' },
+  },
+  {
     path: '/onboarding',
     name: 'onboarding',
     component: () => import('@/modules/settings/pages/OnboardingPage.vue'),
@@ -66,6 +72,18 @@ const routes: RouteRecordRaw[] = [
         name: 'shipment-edit',
         component: () => import('@/modules/shipments/pages/ShipmentFormPage.vue'),
         meta: { permission: 'shipments.book', title: 'Edit shipment' },
+      },
+      {
+        path: 'live-map',
+        name: 'live-map',
+        component: () => import('@/modules/tracking/pages/LiveMapPage.vue'),
+        meta: { permission: 'shipments.view', title: 'Live map' },
+      },
+      {
+        path: 'exceptions',
+        name: 'exceptions',
+        component: () => import('@/modules/exceptions/pages/ExceptionsPage.vue'),
+        meta: { permission: 'exceptions.view', title: 'Exceptions' },
       },
       {
         path: 'masterdata/parties',

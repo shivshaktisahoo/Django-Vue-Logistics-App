@@ -28,6 +28,7 @@ from apps.organizations.permissions import Role
 from apps.shipments import services as shipment_services
 from apps.shipments.domain import EventCode, ShipmentStatus, container_check_digit
 from apps.shipments.models import Package, Shipment
+from apps.tracking import geo
 
 from . import data
 
@@ -104,6 +105,20 @@ def _seed_workspace(org: Organization, users: dict[str, User]) -> None:
         )
 
     _seed_shipments(org, users, rng, locations, carriers, parties)
+    _seed_exceptions(org, users)
+
+
+def _seed_exceptions(org, users) -> None:
+    """Run the rule engine at the real "now", then show the workflow in progress."""
+    from apps.exceptions import detection
+    from apps.exceptions import services as exc_services
+    from apps.exceptions.models import ShipmentException
+
+    detection.scan(org=org)
+    open_rows = ShipmentException.objects.filter(org=org, status="open").order_by("detected_at")
+    first = open_rows.first()
+    if first is not None:
+        exc_services.acknowledge(exc=first, actor=users[Role.OPS])
 
 
 def _seed_locations(org) -> dict[str, Location]:
@@ -257,7 +272,41 @@ def _country(location_code: str) -> str:
     return "AE" if location_code == "JAFZADC" else location_code[:2]
 
 
-def _plan(rng, lane, etd: datetime, eta: datetime, delay: timedelta) -> list[tuple]:
+WAYPOINT_NAMES = {
+    "singapore_strait": "Singapore Strait",
+    "malacca_north": "Strait of Malacca",
+    "sri_lanka": "south of Sri Lanka",
+    "arabian_sea": "Arabian Sea",
+    "gulf_of_aden": "Gulf of Aden",
+    "suez": "Suez Canal",
+    "central_med": "central Mediterranean",
+    "gibraltar": "Strait of Gibraltar",
+    "dover": "English Channel",
+    "mid_atlantic": "mid-Atlantic",
+    "hormuz": "Strait of Hormuz",
+}
+
+
+def _voyage_reports(origin: Location, dest: Location, etd: datetime, eta: datetime) -> list[tuple]:
+    """AIS-style position reports as the vessel passes the lane's chokepoints."""
+    a = (float(origin.latitude), float(origin.longitude))
+    b = (float(dest.latitude), float(dest.longitude))
+    route = geo.sea_route(a, b)
+    names = {point: WAYPOINT_NAMES.get(key) for key, point in geo.SEA_NODES.items()}
+    total = geo.route_length_km(route)
+    travelled, reports = 0.0, []
+    for i in range(1, len(route) - 1):
+        travelled += geo.haversine_km(route[i - 1], route[i])
+        name = names.get(route[i])
+        if name:
+            at = etd + (eta - etd) * (travelled / total)
+            reports.append(("event", EventCode.NOTE, at, f"Vessel position report: passing {name}"))
+    return reports
+
+
+def _plan(
+    rng, lane, etd: datetime, eta: datetime, delay: timedelta, reports: list[tuple]
+) -> list[tuple]:
     """Chronological (kind, value, offset-time, note) steps for a shipment's life."""
     mode, origin, dest = lane[2], lane[0], lane[1]
     cross_border = _country(origin) != _country(dest)
@@ -274,6 +323,7 @@ def _plan(rng, lane, etd: datetime, eta: datetime, delay: timedelta) -> list[tup
             ("event", EventCode.LOADED, etd - timedelta(hours=4), "Loaded on board"),
         ]
     steps.append(("status", S.IN_TRANSIT, etd, ""))
+    steps += reports
     if delay:
         steps.append(
             (
@@ -384,7 +434,14 @@ def _seed_shipments(org, users, rng, locations, carriers, parties) -> None:
             )
             continue
 
-        for kind, value, at, note in _plan(rng, lane, etd, eta, delay):
+        # A few vessels go quiet (no AIS reports) so the stale-tracking rule has real work.
+        reports = (
+            []
+            if mode != "ocean" or i % 7 == 0
+            else _voyage_reports(locations[origin], locations[dest], etd, eta)
+        )
+        steps = sorted(_plan(rng, lane, etd, eta, delay, reports), key=lambda step: step[2])
+        for kind, value, at, note in steps:
             if at > now - timedelta(minutes=30):
                 break
             location = (

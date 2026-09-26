@@ -75,8 +75,8 @@ const groups: NavGroup[] = [
     label: 'Operations',
     items: [
       { title: 'Shipments', icon: mdiPackageVariantClosed, to: '/shipments', permission: 'shipments.view' },
-      { title: 'Live map', icon: mdiMapMarkerPath, permission: 'shipments.view', soon: true },
-      { title: 'Exceptions', icon: mdiAlertOctagonOutline, permission: 'exceptions.view', soon: true },
+      { title: 'Live map', icon: mdiMapMarkerPath, to: '/live-map', permission: 'shipments.view' },
+      { title: 'Exceptions', icon: mdiAlertOctagonOutline, to: '/exceptions', permission: 'exceptions.view' },
       { title: 'Trips', icon: mdiTruckOutline, permission: 'trips.view', soon: true },
     ],
   },

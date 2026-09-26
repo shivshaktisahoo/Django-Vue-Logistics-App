@@ -274,7 +274,15 @@ def change_status(
         summary=f"{S(current).label} → {S(target).label}" + (f": {note}" if note else ""),
         changes={"status": [current, target]},
     )
+    _reconcile_exceptions(shipment)
     return shipment
+
+
+def _reconcile_exceptions(shipment: Shipment) -> None:
+    # Imported lazily: the exceptions app depends on shipments, not the other way round.
+    from apps.exceptions.detection import reconcile_shipment
+
+    reconcile_shipment(shipment)
 
 
 def _default_location(shipment: Shipment, status: str):
@@ -319,6 +327,9 @@ def add_event(
         created_by=actor if getattr(actor, "is_authenticated", False) else None,
     )
     if code == EventCode.DELAYED:
+        from apps.exceptions.services import raise_delay
+
+        raise_delay(shipment=shipment, description=event.description, occurred_at=occurred_at)
         audit.record(
             org=shipment.org,
             actor=actor,
@@ -326,4 +337,5 @@ def add_event(
             entity=shipment,
             summary=description or "Delay reported",
         )
+    _reconcile_exceptions(shipment)
     return event

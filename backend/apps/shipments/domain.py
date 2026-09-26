@@ -140,3 +140,23 @@ def is_valid_container_number(number: str) -> bool:
     if len(n) != 11 or not n[:4].isalpha() or not n[4:].isdigit() or n[3] not in "UJZ":
         return False
     return container_check_digit(n[:10]) == int(n[10])
+
+
+# ---------------------------------------------------------------- ETA health
+
+ETA_RISK_WINDOW_HOURS = 24
+# Statuses in which the cargo has not yet reached the destination hub.
+PRE_ARRIVAL_STATUSES = frozenset({S.BOOKED, S.PICKED_UP, S.IN_TRANSIT, S.ON_HOLD})
+
+
+def eta_health(status: str, eta, now) -> str | None:
+    """late: promised ETA passed without delivery. risk: due within 24 h but not yet
+    at the destination. ok otherwise; None when there's nothing to judge."""
+    if eta is None or status in TERMINAL_STATUSES or status == S.DRAFT:
+        return None
+    hours_left = (eta - now).total_seconds() / 3600
+    if hours_left < 0:
+        return "late"
+    if hours_left < ETA_RISK_WINDOW_HOURS and status in PRE_ARRIVAL_STATUSES:
+        return "risk"
+    return "ok"

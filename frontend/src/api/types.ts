@@ -227,3 +227,104 @@ export interface CursorPage<T> {
   previous: string | null
   results: T[]
 }
+
+// ---------------------------------------------------------------- tracking & exceptions
+
+export type EtaHealth = 'late' | 'risk' | 'ok' | null
+
+export interface GeoPoint {
+  code: string
+  name: string
+  city: string
+  country: string
+  lat: number
+  lng: number
+}
+
+export interface LivePosition {
+  lat: number
+  lng: number
+  heading: number
+  progress: number
+  phase: 'at_origin' | 'moving' | 'at_destination'
+}
+
+export interface LiveShipment {
+  id: string
+  reference: string
+  tracking_number: string
+  status: ShipmentStatus
+  mode: Mode
+  customer: string
+  carrier: string | null
+  origin: GeoPoint
+  destination: GeoPoint
+  etd: string | null
+  eta: string | null
+  atd: string | null
+  position: LivePosition | null
+  eta_health: EtaHealth
+  distance_km: number
+  route: [number, number][]
+}
+
+export interface PublicTracking {
+  tracking_number: string
+  status: ShipmentStatus
+  status_label: string
+  mode: Mode
+  service: string
+  forwarder: string
+  origin: GeoPoint
+  destination: GeoPoint
+  etd: string | null
+  eta: string | null
+  atd: string | null
+  ata: string | null
+  pieces: number
+  events: { code: string; label: string; description: string; location: string | null; occurred_at: string }[]
+  position: LivePosition | null
+  eta_health: EtaHealth
+  distance_km: number
+  route: [number, number][]
+}
+
+export type ExceptionSeverity = 'low' | 'medium' | 'high' | 'critical'
+export type ExceptionStatus = 'open' | 'acknowledged' | 'resolved'
+
+export interface ShipmentExceptionItem {
+  id: string
+  shipment: {
+    id: string
+    reference: string
+    status: ShipmentStatus
+    mode: Mode
+    customer: string
+    origin: string
+    destination: string
+    eta: string | null
+  }
+  kind: string
+  kind_label: string
+  severity: ExceptionSeverity
+  status: ExceptionStatus
+  title: string
+  detail: string
+  detected_at: string
+  assignee_id: string | null
+  assignee_name: string | null
+  acknowledged_at: string | null
+  resolved_at: string | null
+  resolved_by_name: string | null
+  resolution_note: string
+  auto_resolved: boolean
+  updated_at: string
+}
+
+export interface ExceptionSummary {
+  open: number
+  acknowledged: number
+  critical: number
+  high: number
+  mine: number
+}

@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.masterdata",
     "apps.shipments",
+    "apps.tracking",
+    "apps.exceptions",
     "apps.demo",
 ]
 
@@ -140,6 +142,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.demo.tasks.reset_demo_workspace",
         "schedule": crontab(hour=0, minute=0),
     },
+    "scan-exceptions": {
+        "task": "apps.exceptions.tasks.scan_exceptions",
+        "schedule": crontab(minute=5),  # hourly
+    },
 }
 
 # ---- DRF ----
@@ -185,6 +191,8 @@ SPECTACULAR_SETTINGS = {
         "ModeEnum": "apps.masterdata.models.Mode",
         "LocationKindEnum": "apps.masterdata.models.Location.Kind",
         "PackageKindEnum": "apps.shipments.models.Package.Kind",
+        "ExceptionKindEnum": "apps.exceptions.models.ShipmentException.Kind",
+        "ExceptionStatusEnum": "apps.exceptions.models.ShipmentException.Status",
     },
 }
 
