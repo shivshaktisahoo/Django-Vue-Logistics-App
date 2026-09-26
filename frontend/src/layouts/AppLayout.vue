@@ -77,12 +77,12 @@ const groups: NavGroup[] = [
       { title: 'Shipments', icon: mdiPackageVariantClosed, to: '/shipments', permission: 'shipments.view' },
       { title: 'Live map', icon: mdiMapMarkerPath, to: '/live-map', permission: 'shipments.view' },
       { title: 'Exceptions', icon: mdiAlertOctagonOutline, to: '/exceptions', permission: 'exceptions.view' },
-      { title: 'Trips', icon: mdiTruckOutline, permission: 'trips.view', soon: true },
+      { title: 'Trips', icon: mdiTruckOutline, to: '/trips', permission: 'trips.view' },
     ],
   },
   {
     label: 'Procurement',
-    items: [{ title: 'Tenders & bids', icon: mdiGavel, permission: 'tenders.view', soon: true }],
+    items: [{ title: 'Tenders & bids', icon: mdiGavel, to: '/tenders', permission: 'tenders.view' }],
   },
   {
     label: 'Integration',

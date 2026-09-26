@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     "apps.shipments",
     "apps.tracking",
     "apps.exceptions",
+    "apps.documents",
+    "apps.tenders",
+    "apps.trips",
     "apps.demo",
 ]
 
@@ -142,6 +145,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.demo.tasks.reset_demo_workspace",
         "schedule": crontab(hour=0, minute=0),
     },
+    "close-expired-tenders": {
+        "task": "apps.tenders.tasks.close_expired_tenders",
+        "schedule": crontab(minute=10),  # hourly backstop; reads also close lazily
+    },
     "scan-exceptions": {
         "task": "apps.exceptions.tasks.scan_exceptions",
         "schedule": crontab(minute=5),  # hourly
@@ -193,6 +200,11 @@ SPECTACULAR_SETTINGS = {
         "PackageKindEnum": "apps.shipments.models.Package.Kind",
         "ExceptionKindEnum": "apps.exceptions.models.ShipmentException.Kind",
         "ExceptionStatusEnum": "apps.exceptions.models.ShipmentException.Status",
+        "TenderStatusEnum": "apps.tenders.models.Tender.Status",
+        "BidStatusEnum": "apps.tenders.models.Bid.Status",
+        "TripStatusEnum": "apps.trips.models.Trip.Status",
+        "VehicleTypeEnum": "apps.masterdata.models.Vehicle.Type",
+        "DocTypeEnum": "apps.documents.models.ShipmentDocument.DocType",
     },
 }
 

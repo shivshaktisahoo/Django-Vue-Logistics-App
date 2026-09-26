@@ -29,8 +29,9 @@ from apps.shipments import services as shipment_services
 from apps.shipments.domain import EventCode, ShipmentStatus, container_check_digit
 from apps.shipments.models import Package, Shipment
 from apps.tracking import geo
+from apps.trips.models import Trip
 
-from . import data
+from . import data, paperwork, procurement
 
 DEMO_ORG_NAME = "Gulfstream Freight Forwarders"
 SHIPMENT_COUNT = 40
@@ -63,10 +64,12 @@ def _demo_user(role: str) -> User:
 
 
 @transaction.atomic
-def seed_demo(*, reset: bool = False) -> Organization:
+def seed_demo(*, reset: bool = False, operations: bool = True) -> Organization:
     if reset:
         for old in Organization.objects.filter(is_demo=True):
-            # Shipments PROTECT their parties/locations, so they go first.
+            # Trips PROTECT their shipments and shipments their parties, so delete
+            # the operational data top-down before the org cascade.
+            Trip.objects.filter(org=old).delete()
             Shipment.objects.filter(org=old).delete()
             old.delete()
 
@@ -85,11 +88,11 @@ def seed_demo(*, reset: bool = False) -> Organization:
             address="Jebel Ali Free Zone, Dubai, UAE",
             owner=users[Role.ADMIN],
         )
-        _seed_workspace(org, users)
+        _seed_workspace(org, users, operations=operations)
     return org
 
 
-def _seed_workspace(org: Organization, users: dict[str, User]) -> None:
+def _seed_workspace(org: Organization, users: dict[str, User], *, operations: bool) -> None:
     rng = random.Random(20260925)
     locations = _seed_locations(org)
     carriers = _seed_carriers(org)
@@ -103,8 +106,22 @@ def _seed_workspace(org: Organization, users: dict[str, User]) -> None:
         Membership.objects.update_or_create(
             user=user, org=org, defaults={"role": role, "is_active": True, **scopes.get(role, {})}
         )
+    if not operations:  # personas and master data only (fast, for tests)
+        return
 
     _seed_shipments(org, users, rng, locations, carriers, parties)
+    now = timezone.now()
+    procurement.sync_trips(org=org, users=users, rng=rng, now=now)
+    procurement.open_marketplace(
+        org=org,
+        users=users,
+        carriers=carriers,
+        locations=locations,
+        parties=parties,
+        rng=rng,
+        now=now,
+    )
+    paperwork.attach_paperwork(org=org, users=users, rng=rng)
     _seed_exceptions(org, users)
 
 
@@ -419,9 +436,18 @@ def _seed_shipments(org, users, rng, locations, carriers, parties) -> None:
         if is_portal_draft:
             continue
 
-        shipment = _apply(
-            shipment, ops, S.BOOKED, created + timedelta(hours=rng.uniform(1, 5)), None, "", now
-        )
+        booked_at = created + timedelta(hours=rng.uniform(1, 5))
+        shipment = _apply(shipment, ops, S.BOOKED, booked_at, None, "", now)
+        if mode == "road" and i % 17 != 3:
+            procurement.tender_and_award(
+                shipment=shipment,
+                booked_at=booked_at,
+                users=users,
+                carriers=carriers,
+                rng=rng,
+                now=now,
+            )
+            shipment.refresh_from_db()
         if i % 17 == 3:
             _apply(
                 shipment,

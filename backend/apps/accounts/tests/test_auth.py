@@ -54,7 +54,7 @@ def test_logout_blacklists_refresh_token(api_client, make_user):
 
 @pytest.mark.parametrize("role", [r.value for r in Role])
 def test_demo_login_for_every_role(api_client, role):
-    org = seed_demo()
+    org = seed_demo(operations=False)
 
     resp = api_client.post("/api/v1/auth/demo/", {"role": role})
 

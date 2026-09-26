@@ -86,6 +86,30 @@ const routes: RouteRecordRaw[] = [
         meta: { permission: 'exceptions.view', title: 'Exceptions' },
       },
       {
+        path: 'tenders',
+        name: 'tenders',
+        component: () => import('@/modules/tenders/pages/TendersPage.vue'),
+        meta: { permission: 'tenders.view', title: 'Tenders & bids' },
+      },
+      {
+        path: 'tenders/:id',
+        name: 'tender-detail',
+        component: () => import('@/modules/tenders/pages/TenderDetailPage.vue'),
+        meta: { permission: 'tenders.view', title: 'Tender' },
+      },
+      {
+        path: 'trips',
+        name: 'trips',
+        component: () => import('@/modules/trips/pages/TripsPage.vue'),
+        meta: { permission: 'trips.view', title: 'Trips' },
+      },
+      {
+        path: 'trips/:id',
+        name: 'trip-detail',
+        component: () => import('@/modules/trips/pages/TripDetailPage.vue'),
+        meta: { permission: 'trips.view', title: 'Trip' },
+      },
+      {
         path: 'masterdata/parties',
         name: 'parties',
         component: () => import('@/modules/masterdata/pages/PartiesPage.vue'),

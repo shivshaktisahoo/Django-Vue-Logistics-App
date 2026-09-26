@@ -328,3 +328,137 @@ export interface ExceptionSummary {
   high: number
   mine: number
 }
+
+// ---------------------------------------------------------------- procurement, trips, documents
+
+export type TenderStatus = 'open' | 'closed' | 'awarded' | 'cancelled'
+export type BidStatus = 'submitted' | 'withdrawn' | 'won' | 'lost'
+export type TripStatus = 'planned' | 'dispatched' | 'in_progress' | 'completed' | 'cancelled'
+
+export interface PlaceRef {
+  code: string
+  name: string
+  city: string
+  country: string
+}
+
+export interface Load {
+  id: string
+  reference: string
+  status: ShipmentStatus
+  service_type: string
+  commodity: string
+  total_packages: number
+  gross_weight_kg: string
+  volume_cbm: string
+  is_hazardous: boolean
+  is_temperature_controlled: boolean
+  origin: PlaceRef
+  destination: PlaceRef
+}
+
+export interface Bid {
+  id: string
+  carrier: string
+  carrier_name: string
+  carrier_code: string
+  amount: string
+  currency: string
+  transit_hours: number
+  notes: string
+  status: BidStatus
+  revision: number
+  updated_at: string
+}
+
+export interface Tender {
+  id: string
+  reference: string
+  status: TenderStatus
+  shipment: Load
+  customer: string | null
+  vehicle_type: string
+  pickup_at: string
+  deliver_by: string
+  closes_at: string
+  currency: string
+  notes: string
+  target_rate: string | null
+  bid_count: number | null
+  best_amount: string | null
+  invited_count: number
+  my_bid: Bid | null
+  awarded_to: string | null
+  cancel_reason: string
+  created_at: string
+}
+
+export interface TenderDetail extends Tender {
+  bids: Bid[] | null
+  invited_carriers: { id: string; name: string; code: string }[] | null
+  trip_id: string | null
+}
+
+export interface TripStop {
+  id: number
+  sequence: number
+  kind: 'pickup' | 'delivery'
+  location: PlaceRef
+  shipment: {
+    id: string
+    reference: string
+    status: ShipmentStatus
+    commodity: string
+    total_packages: number
+    gross_weight_kg: string
+    is_hazardous: boolean
+    is_temperature_controlled: boolean
+  }
+  party: { name: string; contact: string; phone: string; city: string }
+  planned_at: string
+  arrived_at: string | null
+  completed_at: string | null
+  receiver_name: string
+}
+
+export interface Trip {
+  id: string
+  reference: string
+  status: TripStatus
+  carrier: { id: string; name: string; code: string }
+  vehicle: { id: string; plate_number: string; vehicle_type: string; capacity_kg: number } | null
+  driver: { id: string; name: string; phone: string } | null
+  tender: { id: string; reference: string } | null
+  agreed_rate: string | null
+  currency: string
+  planned_start: string
+  planned_end: string
+  started_at: string | null
+  completed_at: string | null
+  notes: string
+  stops: TripStop[]
+  next_stop_id: string | null
+  load_kg: string
+}
+
+export interface FleetOptions {
+  load_kg: string
+  vehicles: { id: string; plate_number: string; vehicle_type: string; capacity_kg: number; fits: boolean; busy_on: string | null }[]
+  drivers: { id: string; name: string; phone: string }[]
+}
+
+export interface ShipmentDocument {
+  id: string
+  shipment: string
+  trip: string | null
+  doc_type: string
+  doc_type_label: string
+  file_name: string
+  content_type: string
+  size: number
+  notes: string
+  visible_to_customer: boolean
+  uploaded_by: string | null
+  uploaded_by_name: string
+  created_at: string
+}

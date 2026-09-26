@@ -13,6 +13,9 @@ api_v1 = [
     path("audit/", include("apps.audit.urls")),
     path("tracking/", include("apps.tracking.urls")),
     path("exceptions/", include("apps.exceptions.urls")),
+    path("documents/", include("apps.documents.urls")),
+    path("tenders/", include("apps.tenders.urls")),
+    path("trips/", include("apps.trips.urls")),
     path("public/", include(public_tracking)),
 ]
 

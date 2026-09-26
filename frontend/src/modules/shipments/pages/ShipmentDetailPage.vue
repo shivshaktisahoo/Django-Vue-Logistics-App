@@ -24,6 +24,8 @@ import { useOrgStore } from '@/stores/org'
 import { formatDateTime, formatMoney, formatNumber } from '@/utils/format'
 import { etaHealth, hoursLate } from '@/utils/shipments'
 import AuditTrail from '../components/AuditTrail.vue'
+import RoadProcurement from '../components/RoadProcurement.vue'
+import ShipmentDocuments from '../components/ShipmentDocuments.vue'
 import EventTimeline from '../components/EventTimeline.vue'
 import JourneyBar from '../components/JourneyBar.vue'
 import StatusDialog from '../components/StatusDialog.vue'
@@ -217,6 +219,7 @@ const billLabels = computed(() =>
             <v-tabs v-model="tab" color="primary" class="px-2">
               <v-tab value="overview" class="text-none">Overview</v-tab>
               <v-tab value="cargo" class="text-none">Cargo ({{ s.packages.length }})</v-tab>
+              <v-tab v-if="orgStore.can('documents.view')" value="documents" class="text-none">Documents</v-tab>
               <v-tab v-if="orgStore.can('audit.view')" value="activity" class="text-none">Activity</v-tab>
             </v-tabs>
             <v-divider />
@@ -279,6 +282,10 @@ const billLabels = computed(() =>
                 </v-table>
               </v-window-item>
 
+              <v-window-item v-if="orgStore.can('documents.view')" value="documents">
+                <ShipmentDocuments :shipment-id="s.id" />
+              </v-window-item>
+
               <v-window-item v-if="orgStore.can('audit.view')" value="activity">
                 <AuditTrail :entity-id="s.id" />
               </v-window-item>
@@ -287,6 +294,7 @@ const billLabels = computed(() =>
         </v-col>
 
         <v-col cols="12" lg="5">
+          <RoadProcurement v-if="s.mode === 'road'" :shipment="s" />
           <v-card class="cp-card pa-5">
             <EventTimeline :shipment-id="s.id" :can-add="orgStore.can('tracking.update') && !['draft', 'cancelled'].includes(s.status)" />
           </v-card>

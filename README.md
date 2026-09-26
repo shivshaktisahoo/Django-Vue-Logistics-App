@@ -29,7 +29,7 @@ Visitors can create and edit freely. The demo workspace is rebuilt every night.
 | 1. Foundation | Multi-tenant orgs, 4-role RBAC, JWT with an httpOnly refresh cookie, one-click demo personas, CI, free-tier deploy pipeline | ✅ |
 | 2. Shipments core | Master data (UN/LOCODE locations, carriers, fleet, customer address books), booking form with live chargeable weight, ISO 6346 container validation, status state machine, milestones, audit trail | ✅ |
 | 3. Tracking & exceptions | Live map with positions computed along real sea lanes (Malacca, Suez, Hormuz) and great-circle air routes; public no-login tracking page; rule engine that raises, escalates and auto-clears exceptions (past ETA, ETA at risk, stale tracking, customs dwell, long holds) with an acknowledge/assign/resolve workflow | ✅ |
-| 4. Carrier bidding & trips | Tenders, sealed bids, auto-close, award → trip, POD | ⏳ |
+| 4. Carrier bidding & trips | Spot tenders with sealed bids (carriers see only their own; target rate stays internal), deadline auto-close, one-click award that books the carrier and creates the trip; carriers dispatch their own truck and driver (payload and availability checked), run pickup and delivery stops that drive the shipment lifecycle, and capture a signed POD; shipment documents stored with content-sniffed type validation and authenticated downloads | ✅ |
 | 5. Bulk ops & integration | CargoWise-style XML/CSV import with async progress, bulk updates, signed webhooks | ⏳ |
 | 6. Notifications | Email/WhatsApp adapters, rules, outbox | ⏳ |
 | 7. Control tower & reports | KPIs, carrier scorecards, query-optimization lab | ⏳ |
