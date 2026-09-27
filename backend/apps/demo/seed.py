@@ -39,7 +39,7 @@ SHIPMENT_COUNT = 40
 DEMO_PEOPLE = {
     Role.ADMIN: ("Aisha Rahman", "Operations Director"),
     Role.OPS: ("Rohan Mehta", "Ops Coordinator"),
-    Role.CUSTOMER: ("Laura Chen", "Logistics Manager, Nordic Home Retail"),
+    Role.CUSTOMER: ("Elena Kovacs", "Logistics Manager, Nordic Home Retail"),
     Role.CARRIER: ("Omar Haddad", "Dispatch Lead, Desert Line Transport"),
 }
 

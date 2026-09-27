@@ -179,7 +179,7 @@ PARTIES = [
         True,
         "Stockholm",
         "SE",
-        "Laura Chen",
+        "Elena Kovacs",
         "logistics@nordichome.example",
     ),
     (
