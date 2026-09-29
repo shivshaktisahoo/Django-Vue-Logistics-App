@@ -8,7 +8,14 @@
 set -euo pipefail
 
 python manage.py migrate --noinput
-python manage.py seed_demo
+
+# Seed demo data. Never block the server from starting — if the seed fails,
+# the API still boots and the health check passes. Re-run via a fresh deploy.
+if python manage.py seed_demo; then
+  echo "[start-render] Demo workspace seeded."
+else
+  echo "[start-render] WARNING: seed_demo failed. Demo logins will not work until a successful re-deploy."
+fi
 
 if [[ -n "${REDIS_URL:-}" ]]; then
   # --without-gossip/mingle/heartbeat: no chatter between workers (there is only one),
